@@ -1,0 +1,12 @@
+---
+- name: Configure Spine Switches
+  hosts: spines
+  gather_facts: no
+  roles:
+    - spine
+
+- name: Configure Leaf Switches
+  hosts: leafs
+  gather_facts: no
+  roles:
+    - leaf

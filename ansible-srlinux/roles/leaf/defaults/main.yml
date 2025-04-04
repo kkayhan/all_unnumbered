@@ -1,0 +1,3 @@
+leaf_peer_group_spine: "spine"
+leaf_peer_group_host: "host-vm"
+leaf_allowed_host_as_range: "1..4294967295"

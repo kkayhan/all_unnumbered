@@ -1,0 +1,75 @@
+{
+  "name": "default",
+  "type": "default",
+  "ip-forwarding": {
+    "receive-ipv4-check": false,
+    "receive-ipv6-check": false
+  },
+  "interface": [
+    {% for port in range(1, leaf_count + 1) %}
+    { "name": "ethernet-1/{{ port }}.1" }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ],
+  "protocols": {
+    "bgp": {
+      "autonomous-system": {{ spine_as }},
+      "router-id": "{{ router_id }}",
+      "dynamic-neighbors": {
+        "interface": [
+          {% for port in range(1, leaf_count + 1) %}
+          {
+            "interface-name": "ethernet-1/{{ port }}.1",
+            "peer-group": "{{ spine_peer_group }}",
+            "allowed-peer-as": [ "{{ spine_allowed_leaf_as_range }}" ]
+          }{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ]
+      },
+      "ebgp-default-policy": {
+        "import-reject-all": false,
+        "export-reject-all": false
+      },
+      "failure-detection": {
+        "enable-bfd": true
+      },
+      "afi-safi": [
+        {
+          "afi-safi-name": "ipv4-unicast",
+          "admin-state": "enable",
+          "multipath": {
+            "ebgp": {
+              "maximum-paths": 128
+            }
+          }
+        },
+        {
+          "afi-safi-name": "ipv6-unicast",
+          "admin-state": "enable",
+          "multipath": {
+            "ebgp": {
+              "maximum-paths": 128
+            }
+          },
+          "ipv4-unicast": {
+            "advertise-ipv6-next-hops": true,
+            "receive-ipv6-next-hops": true
+          }
+        }
+      ],
+      "route-advertisement": {
+        "rapid-withdrawal": true
+      },
+      "transport": {
+        "mtu-discovery": true
+      },
+      "group": [
+        {
+          "group-name": "{{ spine_peer_group }}"
+        }
+      ]
+    }
+  },
+  "mtu": {
+    "path-mtu-discovery": true
+  }
+}

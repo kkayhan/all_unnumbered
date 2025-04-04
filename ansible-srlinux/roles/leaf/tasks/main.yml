@@ -1,0 +1,37 @@
+- name: Enable leaf uplink and host interfaces
+  nokia.srlinux.config:
+    replace:
+      - path: "/interface[name={{ item }}]"
+        value:
+          name: "{{ item }}"
+          admin-state: enable
+          subinterface:
+            - index: 1
+              ipv6:
+                admin-state: enable
+                router-advertisement:
+                  router-role:
+                    admin-state: enable
+  loop:
+    - "ethernet-1/1"
+    - "ethernet-1/49"
+    - "ethernet-1/50"
+
+- name: Configure leaf loopback interface (system0)
+  nokia.srlinux.config:
+    replace:
+      - path: "/interface[name=system0]"
+        value:
+          name: "system0"
+          subinterface:
+            - index: 0
+              ipv4:
+                admin-state: enable
+                address:
+                  - ip-prefix: "{{ loopback_ip }}"
+
+- name: Configure default network instance (BGP on leaf)
+  nokia.srlinux.config:
+    replace:
+      - path: "/network-instance[name=default]"
+        value: "{{ lookup('ansible.builtin.template', 'leaf_network_instance.json.j2')  }}"

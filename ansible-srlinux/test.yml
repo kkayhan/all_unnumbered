@@ -1,0 +1,12 @@
+- name: Example playbook
+  hosts: all
+  tasks:
+    - name: Get version
+      nokia.srlinux.get:
+        paths:
+          - path: /system/information/version
+            datastore: state
+      register: output
+
+    - ansible.builtin.debug:
+        msg: 'SR Linux version {{output.result[0]}}'

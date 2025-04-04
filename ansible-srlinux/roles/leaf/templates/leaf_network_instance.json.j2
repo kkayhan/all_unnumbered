@@ -1,0 +1,83 @@
+{
+  "name": "default",
+  "type": "default",
+  "ip-forwarding": {
+    "receive-ipv4-check": false,
+    "receive-ipv6-check": false
+  },
+  "interface": [
+    { "name": "ethernet-1/1.1" },
+    { "name": "ethernet-1/49.1" },
+    { "name": "ethernet-1/50.1" },
+    { "name": "system0.0" }
+  ],
+  "protocols": {
+    "bgp": {
+      "autonomous-system": {{ bgp_as }},
+      "router-id": "{{ router_id }}",
+      "dynamic-neighbors": {
+        "interface": [
+          {
+            "interface-name": "ethernet-1/1.1",
+            "peer-group": "{{ leaf_peer_group_host }}",
+            "allowed-peer-as": [ "{{ leaf_allowed_host_as_range }}" ]
+          },
+          {
+            "interface-name": "ethernet-1/49.1",
+            "peer-group": "{{ leaf_peer_group_spine }}",
+            "allowed-peer-as": [ "{{ spine_as }}" ]
+          },
+          {
+            "interface-name": "ethernet-1/50.1",
+            "peer-group": "{{ leaf_peer_group_spine }}",
+            "allowed-peer-as": [ "{{ spine_as }}" ]
+          }
+        ]
+      },
+      "ebgp-default-policy": {
+        "import-reject-all": false,
+        "export-reject-all": false
+      },
+      "failure-detection": {
+        "enable-bfd": true
+      },
+      "afi-safi": [
+        {
+          "afi-safi-name": "ipv4-unicast",
+          "admin-state": "enable",
+          "multipath": {
+            "ebgp": {
+              "maximum-paths": 128
+            }
+          }
+        },
+        {
+          "afi-safi-name": "ipv6-unicast",
+          "admin-state": "enable",
+          "multipath": {
+            "ebgp": {
+              "maximum-paths": 128
+            }
+          },
+          "ipv4-unicast": {
+            "advertise-ipv6-next-hops": true,
+            "receive-ipv6-next-hops": true
+          }
+        }
+      ],
+      "route-advertisement": {
+        "rapid-withdrawal": true
+      },
+      "transport": {
+        "mtu-discovery": true
+      },
+      "group": [
+        { "group-name": "{{ leaf_peer_group_host }}" },
+        { "group-name": "{{ leaf_peer_group_spine }}" }
+      ]
+    }
+  },
+  "mtu": {
+    "path-mtu-discovery": true
+  }
+}

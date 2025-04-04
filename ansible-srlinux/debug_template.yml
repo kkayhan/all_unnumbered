@@ -1,0 +1,6 @@
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Show rendered spine network instance template
+      debug:
+        msg: "{{ lookup('ansible.builtin.template','roles/spine/templates/spine_network_instance.json.j2') }}"
